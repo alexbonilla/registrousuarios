@@ -5,8 +5,15 @@ import com.iveloper.concesiones.consultasweb.jsf.util.JsfUtil;
 import com.iveloper.concesiones.consultasweb.jsf.util.JsfUtil.PersistAction;
 import com.iveloper.concesiones.consultasweb.beans.AltaUsuariosFacade;
 import com.iveloper.concesiones.utils.SendFileEmail;
+import com.microtripit.mandrillapp.lutung.MandrillApi;
+import com.microtripit.mandrillapp.lutung.model.MandrillApiError;
+import com.microtripit.mandrillapp.lutung.view.MandrillMessage;
+import com.microtripit.mandrillapp.lutung.view.MandrillMessage.Recipient;
+import com.microtripit.mandrillapp.lutung.view.MandrillMessageStatus;
+import java.io.IOException;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -20,6 +27,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.persistence.Query;
 
 @ManagedBean(name = "altaUsuariosController")
 @SessionScoped
@@ -70,35 +78,60 @@ public class AltaUsuariosController implements Serializable {
             //avisar por correo a administrador de nueva solicitud de alta
             usuario = getFacade().find(selected.getUsuario());
             if (usuario != null) {
-            //Se notifica a Admin
-            SendFileEmail sfe = new SendFileEmail();
-            sfe.setUser("invoicehub@iveloper.com");
-            sfe.setPwd("bgNILL1982");
-            sfe.setHost("gator4095.hostgator.com");
-            sfe.setPort("465");
-            sfe.setSsl("true");
-            sfe.setAuth("false");
-            sfe.setFrom("invoicehub@iveloper.com");
-            sfe.setTo("info@concegua.com");
-            sfe.setMessageSubject("ConsultasWeb Suite");
-            sfe.setMessageBody("<p>Se ha solicitado el alta para el usuario " + usuario.getUsuario() + ". Por favor proceder con la validaci&oacute;n de datos.</p>");
-            Thread sendMailThread = new Thread(sfe);
-            sendMailThread.start();
+                try {
 
-                //Se notifica a Usuario
-            SendFileEmail sfeUser = new SendFileEmail();
-            sfeUser.setUser("invoicehub@iveloper.com");
-            sfeUser.setPwd("bgNILL1982");
-            sfeUser.setHost("gator4095.hostgator.com");
-            sfeUser.setPort("465");
-            sfeUser.setSsl("true");
-            sfeUser.setAuth("false");
-            sfeUser.setFrom("invoicehub@iveloper.com");
-            sfeUser.setTo(usuario.getEmail());
-            sfeUser.setMessageSubject("ConsultasWeb Suite");
-            sfeUser.setMessageBody("<p>Su solicitud de alta ha sido recibida. Usted recibir&aacute; una respuesta de aprobaci&oacute;n en un lapso de 24 horas, luego de lo cual podr&aacute; acceder al sistema de Consultas Web.</p><p>Muchas gracias por utilizar nuestro servicios.</p>");
-            Thread sendMailUserThread = new Thread(sfeUser);
-            sendMailUserThread.start();
+                    MandrillApi mandrillApi = new MandrillApi("Wb30-AONNEEZioNKxX9BXQ");
+
+                    // create your message
+                    MandrillMessage message = new MandrillMessage();
+                    message.setSubject("ConsultasWeb Suite");
+                    message.setHtml("<p>Se ha solicitado el alta para el usuario " + usuario.getUsuario() + ". Por favor proceder con la validaci&oacute;n de datos.</p>");
+                    message.setAutoText(true);
+                    message.setFromEmail("alex@iveloper.com");
+                    message.setFromName("ConsultasWeb Suite");
+                    // add recipients
+                    ArrayList<Recipient> recipients = new ArrayList<Recipient>();
+                    Recipient recipient = new Recipient();
+                    recipient.setEmail("afbonilla@gmail.com");
+                    recipient.setName("Alex Bonilla");
+                    recipients.add(recipient);
+
+                    message.setTo(recipients);
+                    message.setPreserveRecipients(true);
+                    ArrayList<String> tags = new ArrayList<String>();
+                    tags.add("notificacion");
+                    tags.add("admin");
+                    message.setTags(tags);
+                    // ... add more message details if you want to!
+                    // then ... send
+                    MandrillMessageStatus[] messageStatusReports = mandrillApi.messages().send(message, false);
+
+                    MandrillMessage messageUser = new MandrillMessage();
+                    messageUser.setSubject("ConsultasWeb Suite");
+                    messageUser.setHtml("<p>Estimado " + usuario.getNombre() +  ", su solicitud de alta ha sido recibida. Usted recibir&aacute; una respuesta de aprobaci&oacute;n en un lapso de 24 horas, luego de lo cual podr&aacute; acceder al sistema de Consultas Web.</p><p>Muchas gracias por utilizar nuestro servicios.</p>");
+                    messageUser.setAutoText(true);
+                    messageUser.setFromEmail("alex@iveloper.com");
+                    messageUser.setFromName("ConsultasWeb Suite");
+                    // add recipients
+                    ArrayList<Recipient> recipientsUser = new ArrayList<Recipient>();
+                    Recipient recipientUser = new Recipient();
+                    recipientUser.setEmail(usuario.getEmail());
+                    recipientUser.setName(usuario.getNombre());
+                    recipientsUser.add(recipientUser);
+
+                    messageUser.setTo(recipientsUser);
+                    messageUser.setPreserveRecipients(true);
+                    ArrayList<String> tagsUser = new ArrayList<String>();
+                    tagsUser.add("notificacion");
+                    tagsUser.add("user");
+                    messageUser.setTags(tags);
+                    // ... add more message details if you want to!
+                    // then ... send
+                    MandrillMessageStatus[] messageStatusReportsUser = mandrillApi.messages().send(message, false);
+
+                } catch (MandrillApiError | IOException ex) {
+                    Logger.getLogger(AltaUsuariosController.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
         if (!JsfUtil.isValidationFailed()) {
@@ -147,6 +180,9 @@ public class AltaUsuariosController implements Serializable {
             setEmbeddableKeys();
             try {
                 if (persistAction != PersistAction.DELETE) {
+                    if (persistAction == PersistAction.UPDATE) {
+                        selected.setFechamodificacion(new Date());
+                    }
                     getFacade().edit(selected);
                 } else {
                     getFacade().remove(selected);
@@ -177,7 +213,7 @@ public class AltaUsuariosController implements Serializable {
     public List<AltaUsuarios> getItemsAvailableSelectOne() {
         return getFacade().findAll();
     }
-
+    
     @FacesConverter(forClass = AltaUsuarios.class)
     public static class AltaUsuariosControllerConverter implements Converter {
 

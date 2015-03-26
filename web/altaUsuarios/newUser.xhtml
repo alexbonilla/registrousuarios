@@ -12,10 +12,10 @@
         <ui:define name="title">
             <h:outputText value="#{bundle.CreateAltaUsuariosTitle}"></h:outputText>
         </ui:define>
-        
+
         <ui:define name="body">
             <h:form id="AltaUsuariosCreateForm"> 
-                <h:messages errorClass="errorMessage" infoClass="infoMessage" warnClass="warnMessage"></h:messages>
+                <p:messages showDetail="true"/>
                 <h:panelGroup id="display">                                                            
                     <p:panelGrid id="newUserEditGrid" columns="2" >                        
                         <p:outputLabel value="#{bundle.CreateAltaUsuariosLabel_usuario}" for="usuario" />
@@ -30,9 +30,11 @@
                         <p:inputText id="email" value="#{newUserBean.email}" title="#{bundle.CreateAltaUsuariosTitle_email}" required="true"/>
                         <p:outputLabel value="#{bundle.CreateAltaUsuariosLabel_telefono}" for="telefono" />
                         <p:inputText id="telefono" value="#{newUserBean.telefono}" title="#{bundle.CreateAltaUsuariosTitle_telefono}" required="true"/>                        
-                    </p:panelGrid>                    
-                    <h:commandButton type="submit" value="Solicitar Alta" action="#{newUserBean.create}"></h:commandButton>
-                    <h:commandButton type="reset" value="Borrar campos"></h:commandButton> 
+                    </p:panelGrid>   
+                    <p:panelGrid columns="1">
+                        <p:captcha label="Captcha" />    
+                    </p:panelGrid>
+                    <h:commandButton type="submit" value="Solicitar Alta" action="#{newUserBean.create}"></h:commandButton>                     
                 </h:panelGroup>                
             </h:form>            
         </ui:define>

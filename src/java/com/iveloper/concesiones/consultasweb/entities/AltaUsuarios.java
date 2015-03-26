@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author alexbonilla
+ * @author Alex
  */
 @Entity
 @Table(name = "alta_usuarios")
@@ -37,13 +37,11 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "AltaUsuarios.findByTelefono", query = "SELECT a FROM AltaUsuarios a WHERE a.telefono = :telefono"),
     @NamedQuery(name = "AltaUsuarios.findByAlta", query = "SELECT a FROM AltaUsuarios a WHERE a.alta = :alta"),
     @NamedQuery(name = "AltaUsuarios.findByFechacreacion", query = "SELECT a FROM AltaUsuarios a WHERE a.fechacreacion = :fechacreacion"),
-    @NamedQuery(name = "AltaUsuarios.findByFechamodificacion", query = "SELECT a FROM AltaUsuarios a WHERE a.fechamodificacion = :fechamodificacion")})
+    @NamedQuery(name = "AltaUsuarios.findByFechamodificacion", query = "SELECT a FROM AltaUsuarios a WHERE a.fechamodificacion = :fechamodificacion"),
+    @NamedQuery(name = "AltaUsuarios.findByClinumcl", query = "SELECT a FROM AltaUsuarios a WHERE a.clinumcl = :clinumcl"),
+    @NamedQuery(name = "AltaUsuarios.findByUltimoacceso", query = "SELECT a FROM AltaUsuarios a WHERE a.ultimoacceso = :ultimoacceso"),
+    @NamedQuery(name = "AltaUsuarios.findByEsAdmin", query = "SELECT a FROM AltaUsuarios a WHERE a.esAdmin = :esAdmin")})
 public class AltaUsuarios implements Serializable {
-    @Column(name = "clinumcl")
-    private Integer clinumcl;
-    @Column(name = "ultimoacceso")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date ultimoacceso;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -75,6 +73,13 @@ public class AltaUsuarios implements Serializable {
     @Column(name = "fechamodificacion")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechamodificacion;
+    @Column(name = "clinumcl")
+    private Integer clinumcl;
+    @Column(name = "ultimoacceso")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date ultimoacceso;
+    @Column(name = "es_admin")
+    private Boolean esAdmin;
 
     public AltaUsuarios() {
     }
@@ -155,6 +160,30 @@ public class AltaUsuarios implements Serializable {
         this.fechamodificacion = fechamodificacion;
     }
 
+    public Integer getClinumcl() {
+        return clinumcl;
+    }
+
+    public void setClinumcl(Integer clinumcl) {
+        this.clinumcl = clinumcl;
+    }
+
+    public Date getUltimoacceso() {
+        return ultimoacceso;
+    }
+
+    public void setUltimoacceso(Date ultimoacceso) {
+        this.ultimoacceso = ultimoacceso;
+    }
+
+    public Boolean getEsAdmin() {
+        return esAdmin;
+    }
+
+    public void setEsAdmin(Boolean esAdmin) {
+        this.esAdmin = esAdmin;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -178,22 +207,6 @@ public class AltaUsuarios implements Serializable {
     @Override
     public String toString() {
         return "com.iveloper.concesiones.consultasweb.entities.AltaUsuarios[ usuario=" + usuario + " ]";
-    }
-
-    public Integer getClinumcl() {
-        return clinumcl;
-    }
-
-    public void setClinumcl(Integer clinumcl) {
-        this.clinumcl = clinumcl;
-    }
-
-    public Date getUltimoacceso() {
-        return ultimoacceso;
-    }
-
-    public void setUltimoacceso(Date ultimoacceso) {
-        this.ultimoacceso = ultimoacceso;
     }
     
 }
